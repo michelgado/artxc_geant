@@ -59,10 +59,15 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction()
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
-  G4double start_x = -10.0*mm;
+  G4double start_x = -45.25*mm;
   G4double start_y = ((G4UniformRand()*2-1)*0.5*mm);
   G4double start_z = ((G4UniformRand()*2-1)*0.5*mm);
   particleGun->SetParticleMomentumDirection(G4ThreeVector(1., 0., 0.));
+  G4double cosTheta = -1.0+2.0*G4UniformRand();
+  G4double phi = twopi * G4UniformRand();
+  G4double sinTheta = sqrt(1-cosTheta*cosTheta);
+  particleGun->SetParticleMomentumDirection(G4ThreeVector(sinTheta * cos(phi) , sinTheta * sin(phi), cosTheta));
+
   particleGun->SetParticlePosition(G4ThreeVector(start_x,start_y,start_z));
   particleGun->GeneratePrimaryVertex(anEvent);
 }

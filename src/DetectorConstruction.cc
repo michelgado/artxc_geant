@@ -9,6 +9,8 @@
 #include "G4SystemOfUnits.hh"
 #include "G4VisAttributes.hh"
 #include "G4Colour.hh"
+#include "G4Polycone.hh"
+
 #include "G4PhysicalConstants.hh"
 #include "G4NistManager.hh"
 
@@ -25,28 +27,32 @@ DetectorConstruction::DetectorConstruction(G4double pixel_side, G4double pixel_d
 //...oooOOO000OOOooo......oooOOO000OOOooo......oooOOO000OOOooo......oooOOO000OOOooo......oooOOO000OOOooo...//  
 DetectorConstruction::~DetectorConstruction()
 {
-.
 }
 //...oooOOO000OOOooo......oooOOO000OOOooo......oooOOO000OOOooo......oooOOO000OOOooo......oooOOO000OOOooo...//
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
   // Init elements and materials for detector	
-  G4Element* elemAl  = new G4Element( "Aluminum"  , "Al"   , 13 ,  26.9815  * g/mole );
   G4Element* elemCd   = new G4Element( "Cadmium"  , "Cd"    , 48 , 112.414    * g/mole );
   G4Element* elemTe   = new G4Element( "Tellurium"  , "Te"    , 52 , 127.6    * g/mole );
-  G4Element* elemAu   = new G4Element( "Aurum"  , "Au"    , 79 , 196.96657    * g/mole );  
-  G4Element* elemPt   = new G4Element( "Platinum"  , "Pt"    , 78 , 195.084   * g/mole );
-  G4Element* elemTi   = new G4Element( "Titanium"  , "Ti"    , 22 , 47.867   * g/mole );
+  G4Element* elemNi   = new G4Element( "Nickel"  , "Ni"    , 28 , 58.6934   * g/mole );
+  G4Element* elemCu   = new G4Element( "Copper"  , "Cu"    , 29 , 63.546   * g/mole );
+
 
   G4Material* materVacuum = new G4Material( "Vacuum" ,  1 , 1.01*g/mole, universe_mean_density , kStateGas , 2.73*kelvin , 3.e-18*pascal );
   G4Material* materCdTe   = new G4Material( "CdTe     "            , 5.85*g/cm3 , 2     );
   G4Material* materCd   = new G4Material( "Cd     "            , 5.85*g/cm3 , 1     );
   G4Material* materTe   = new G4Material( "Te     "            , 5.85*g/cm3 , 1     );
+  G4Material* materMonel   = new G4Material( "Monel"            , 8.8*kg/m3 , 2     );
 
   materCd   -> AddElement( elemCd  , 1);
   materTe   -> AddElement( elemTe  , 1);
   materCdTe   -> AddElement( elemCd  , 1);
   materCdTe   -> AddElement( elemTe  , 1);  
+
+  materMonel   -> AddElement( elemNi  , 2);  
+  materMonel   -> AddElement( elemCu  , 1);  
+
+
   G4NistManager* man = G4NistManager::Instance();
   G4Material* materAu  = man->FindOrBuildMaterial("G4_Au");
   G4Material* materPt  = man->FindOrBuildMaterial("G4_Pt");  
@@ -63,6 +69,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4Box* space_box = new G4Box("space_box", space_x,space_y,space_z);
   space_log = new G4LogicalVolume(space_box, materVacuum, "space_log",0,0,0);
   space_phys = new G4PVPlacement(0,G4ThreeVector(),space_log,"space",0,false,checkOverlaps);
+
+  G4double zs[] = {0, 4.5*mm, 4.5*mm, 5.0*mm};
+  G4double rins[] = {0.,0.,0.,2.*mm};
+  G4double routs[] = {8.*mm,8.*mm,8.*mm,8.*mm};
+  G4Polycone* radsource = new G4Polycone("Radsource", 0., 2*pi, 4, zs, rins,routs);
+  G4LogicalVolume* radsource_log = new G4LogicalVolume(radsource, materMonel, "Radsource", 0, 0 ,0);
+  new G4PVPlacement(0, G4ThreeVector(-5.0*cm, 0., 0.), radsource_log, "Radsource", space_log, 0, 0);
 
   //General sizes
   G4double electrode_layer_depth = (500*1e-6)*mm/2; //500 nanometers
