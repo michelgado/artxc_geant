@@ -38,56 +38,41 @@ int main(int argc,char** argv)
   // Setting random	
   CLHEP::HepRandom::setTheSeed(time(0));//+getpid());
   // Construct the default run manager//
+  // Try to use multitreaded regime with Nthreads  
+    const G4int Nthreads = 30;
   #ifdef G4MULTITHREADED
     G4MTRunManager* runManager = new G4MTRunManager;
-    runManager->SetNumberOfThreads(20);
-    printf("Parallel!");
+    runManager->SetNumberOfThreads(Nthreads);
+    printf("Multithreading");
   #else
     G4RunManager* runManager = new G4RunManager;
-    printf("Single-treaded!");
+    printf("Single thread");
   #endif
 
-  // set mandatory initialization classes//
-  G4double full_side = 28.56*mm;
-  G4double pix_side = full_side / 96.;
+  // Default detector geometry to be shared with other 
+  // modules
+  G4int sideN = 192; // Number of subpixels along detector axis
+  G4double full_side = 28.56*mm; 
+  G4double pix_side = full_side / sideN;
   G4double pix_depth = 1.*mm;
-  G4double electrode_layer_depth = 0.05*mm/2; //50 micrimeters
-  G4double stripe_width = 0.52*mm;
-  G4double stripe_spacing = 0.075*mm; 
-  G4int sideN = 96;
-  G4cout << "--->" <<G4endl;
+  // init detector
   G4VUserDetectorConstruction* detector = new DetectorConstruction(pix_side, pix_depth, sideN);
   runManager->SetUserInitialization(detector);
-  //
-  G4cout << "--->" <<G4endl;
+  // init physics
   G4VModularPhysicsList* physics = new PhysicsList;
   runManager->SetUserInitialization(physics);
-
   // set mandatory user action class
   //
   G4cout << "--->" <<G4endl;
   runManager->SetUserInitialization(new ActionInitialization);  
-  //G4VUserPrimaryGeneratorAction* gen_action = new PrimaryGeneratorAction(pix_side);
-  //runManager->SetUserAction(gen_action);
-  //runManager->SetUserAction(new RunAction);
-  //runManager->SetUserAction(new EventAction);
-  //runManager->SetUserAction(new SteppingAction);
 
   // Initialize G4 kernel
   //
   runManager->Initialize();
-  G4cout << "rm--->" <<G4endl;
-// Initialize visualization
-  //
   G4VisManager* visManager = new G4VisExecutive;
-  // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
-  // G4VisManager* visManager = new G4VisExecutive("Quiet");
   visManager->Initialize();
 
-  // Get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
-  // Get the pointer to the UI manager and set verbosities
-  //
   G4UImanager* UI = G4UImanager::GetUIpointer();
   G4cout << "--->" <<G4endl;
   if ( ! ui ) { 

@@ -25,18 +25,16 @@ DetectorConstruction::DetectorConstruction(G4double pixel_side, G4double pixel_d
 //...oooOOO000OOOooo......oooOOO000OOOooo......oooOOO000OOOooo......oooOOO000OOOooo......oooOOO000OOOooo...//  
 DetectorConstruction::~DetectorConstruction()
 {
-
+.
 }
 //...oooOOO000OOOooo......oooOOO000OOOooo......oooOOO000OOOooo......oooOOO000OOOooo......oooOOO000OOOooo...//
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
-	
+  // Init elements and materials for detector	
   G4Element* elemAl  = new G4Element( "Aluminum"  , "Al"   , 13 ,  26.9815  * g/mole );
   G4Element* elemCd   = new G4Element( "Cadmium"  , "Cd"    , 48 , 112.414    * g/mole );
   G4Element* elemTe   = new G4Element( "Tellurium"  , "Te"    , 52 , 127.6    * g/mole );
-
   G4Element* elemAu   = new G4Element( "Aurum"  , "Au"    , 79 , 196.96657    * g/mole );  
-
   G4Element* elemPt   = new G4Element( "Platinum"  , "Pt"    , 78 , 195.084   * g/mole );
   G4Element* elemTi   = new G4Element( "Titanium"  , "Ti"    , 22 , 47.867   * g/mole );
 
@@ -67,30 +65,27 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   space_phys = new G4PVPlacement(0,G4ThreeVector(),space_log,"space",0,false,checkOverlaps);
 
   //General sizes
-  G4double electrode_layer_depth = 0.05*mm/2; //50 micrimeters
+  G4double electrode_layer_depth = (500*1e-6)*mm/2; //500 nanometers
   G4int side_size = pix_side_num; //number of pixels in detector side
-  G4int thNlayers = 40;
-  G4double thCdTe_depth = (0.04*pix_depth/2.)/thNlayers;    
+  G4int thNlayers = 100;
+  G4double thCdTe_depth = (0.05*pix_depth/2.)/thNlayers;    
   G4double CdTe_side = pix_side/2.;
   G4double full_side = 28.56*mm;
 
   //All detector lie in positive x's
   G4double curr_x = 0.;
+  
+  //Au-Pt layers on top of detector
   G4Box* electrode_box = new G4Box("electrode_box", space_x,space_y,space_z);
-
   G4Box* electrode_layer_box = new G4Box("electrode_layer_box", electrode_layer_depth, full_side/2., full_side/2.);
   G4LogicalVolume* au_electrode_layer_log = new G4LogicalVolume(electrode_layer_box, materAu, "Au_layer", 0, 0 ,0);
   G4LogicalVolume* pt_electrode_layer_log = new G4LogicalVolume(electrode_layer_box, materPt, "Pt_layer", 0, 0 ,0);
-
-
   new G4PVPlacement(0, G4ThreeVector(curr_x+electrode_layer_depth, 0.,
                        0.), au_electrode_layer_log, "Au_anode", space_log, 0, 0);
   curr_x+=2.*electrode_layer_depth;
   new G4PVPlacement(0, G4ThreeVector(curr_x+electrode_layer_depth, 0.,
                        0.), pt_electrode_layer_log, "Pt_anode", space_log, 0, 0);
   curr_x+=2.*electrode_layer_depth;
-
-
 
 
   //ten layers of thin CdTe pixel
@@ -114,15 +109,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
               // Place pixel     
               new G4PVPlacement(0, G4ThreeVector(curr_x+thCdTe_depth, (2*CdTe_side*(ii - side_size*0.5 + 0.5)),
                                (2*CdTe_side*(kk - side_size*0.5 + 0.5))), thCdTe_pixel_log, curr_name, space_log, 0, 0);
-//	      G4cout << "--->" <<(2*CdTe_side*(ii - side_size*0.5 + 0.5))<< " " << (2*CdTe_side*(kk - side_size*0.5 + 0.5)) << G4endl;
             }
         }
   curr_x+=2.*thCdTe_depth;
   }
 
   //Now placing regular thick pixels
-  G4int Nlayers = 48;
-  G4double CdTe_depth = (0.96*pix_depth/2.)/Nlayers;    
+  G4int Nlayers = 95;
+  G4double CdTe_depth = (0.95*pix_depth/2.)/Nlayers;    
 
 
   //CdTe pixel
@@ -152,10 +146,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   curr_x+=2.*CdTe_depth;
   }
 
+
+
   G4LogicalVolume* al_electrode_layer_log = new G4LogicalVolume(electrode_layer_box, materAl, "Al_layer", 0, 0 ,0);
   G4LogicalVolume* ti_electrode_layer_log = new G4LogicalVolume(electrode_layer_box, materTi, "Ti_layer", 0, 0 ,0);
-
-
   new G4PVPlacement(0, G4ThreeVector(curr_x+electrode_layer_depth, 0.,
                        0.), al_electrode_layer_log, "Al_cathode", space_log, 0, 0);
   curr_x+=2.*electrode_layer_depth;
