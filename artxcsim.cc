@@ -39,7 +39,7 @@ int main(int argc,char** argv)
   CLHEP::HepRandom::setTheSeed(time(0));//+getpid());
   // Construct the default run manager//
   // Try to use multitreaded regime with Nthreads  
-    const G4int Nthreads = 30;
+    const G4int Nthreads = 1;
   #ifdef G4MULTITHREADED
     G4MTRunManager* runManager = new G4MTRunManager;
     runManager->SetNumberOfThreads(Nthreads);
@@ -51,7 +51,7 @@ int main(int argc,char** argv)
 
   // Default detector geometry to be shared with other 
   // modules
-  G4int sideN = 192; // Number of subpixels along detector axis
+  G4int sideN = 2; // Number of subpixels along detector axis
   G4double full_side = 28.56*mm; 
   G4double pix_side = full_side / sideN;
   G4double pix_depth = 1.*mm;
@@ -83,15 +83,16 @@ int main(int argc,char** argv)
   }
   else { 
     // interactive mode
-    UImanager->ApplyCommand("/control/execute vis.mac");
+    UImanager->ApplyCommand("/control/execute init_vis.mac");
     ui->SessionStart();
     delete ui;
   }
+
   #ifdef G4VIS_USE
     delete visManager;
   #endif
+
   delete runManager;
-  return 0;
 }
 
 

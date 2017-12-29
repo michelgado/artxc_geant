@@ -10,6 +10,7 @@
 #include "G4VisAttributes.hh"
 #include "G4Colour.hh"
 #include "G4Polycone.hh"
+#include "G4RotationMatrix.hh"
 
 #include "G4PhysicalConstants.hh"
 #include "G4NistManager.hh"
@@ -40,12 +41,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   G4Material* materVacuum = new G4Material( "Vacuum" ,  1 , 1.01*g/mole, universe_mean_density , kStateGas , 2.73*kelvin , 3.e-18*pascal );
   G4Material* materCdTe   = new G4Material( "CdTe     "            , 5.85*g/cm3 , 2     );
-  G4Material* materCd   = new G4Material( "Cd     "            , 5.85*g/cm3 , 1     );
-  G4Material* materTe   = new G4Material( "Te     "            , 5.85*g/cm3 , 1     );
-  G4Material* materMonel   = new G4Material( "Monel"            , 8.8*kg/m3 , 2     );
+  G4Material* materMonel   = new G4Material( "Monel"            , 8.8*g/cm3 , 2     );
 
-  materCd   -> AddElement( elemCd  , 1);
-  materTe   -> AddElement( elemTe  , 1);
   materCdTe   -> AddElement( elemCd  , 1);
   materCdTe   -> AddElement( elemTe  , 1);  
 
@@ -71,16 +68,18 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   space_phys = new G4PVPlacement(0,G4ThreeVector(),space_log,"space",0,false,checkOverlaps);
 
   G4double zs[] = {0, 4.5*mm, 4.5*mm, 5.0*mm};
-  G4double rins[] = {0.,0.,0.,2.*mm};
-  G4double routs[] = {8.*mm,8.*mm,8.*mm,8.*mm};
+  G4double rins[] = {0.,0.,0.,1.*mm};
+  G4double routs[] = {4.*mm,4.*mm,4.*mm,4.*mm};
   G4Polycone* radsource = new G4Polycone("Radsource", 0., 2*pi, 4, zs, rins,routs);
   G4LogicalVolume* radsource_log = new G4LogicalVolume(radsource, materMonel, "Radsource", 0, 0 ,0);
-  new G4PVPlacement(0, G4ThreeVector(-5.0*cm, 0., 0.), radsource_log, "Radsource", space_log, 0, 0);
+  G4RotationMatrix * rotY = new G4RotationMatrix;
+  rotY->rotateY( 270.0 * degree );
+  new G4PVPlacement(rotY, G4ThreeVector(-5.0*cm, 0., 0.), radsource_log, "Radsource", space_log, 0, 0);
 
   //General sizes
   G4double electrode_layer_depth = (500*1e-6)*mm/2; //500 nanometers
   G4int side_size = pix_side_num; //number of pixels in detector side
-  G4int thNlayers = 100;
+  G4int thNlayers = 1;
   G4double thCdTe_depth = (0.05*pix_depth/2.)/thNlayers;    
   G4double CdTe_side = pix_side/2.;
   G4double full_side = 28.56*mm;
@@ -128,7 +127,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   }
 
   //Now placing regular thick pixels
-  G4int Nlayers = 95;
+  G4int Nlayers = 5;
   G4double CdTe_depth = (0.95*pix_depth/2.)/Nlayers;    
 
 
@@ -179,8 +178,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   space_log->SetVisAttributes (G4VisAttributes::Invisible);
   
   G4VisAttributes* CdTe_vis= new G4VisAttributes(G4Colour(1.0,0.5,0.0));
+  G4VisAttributes* rs_vis= new G4VisAttributes(G4Colour(1.0,0.0,1.0));
   CdTe_vis->SetVisibility(true);
   CdTe_pixel_log->SetVisAttributes(CdTe_vis);
+  radsource_log->SetVisAttributes(rs_vis);
   //
   //always return the physical World
   //
