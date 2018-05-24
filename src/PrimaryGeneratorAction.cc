@@ -49,7 +49,7 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
   G4String particleName;
   particleGun->SetParticleDefinition(particleTable->FindParticle(particleName="gamma"));
   particleGun->SetParticlePosition(G4ThreeVector(-1.0*mm, 0.0, 0.0));
-  particleGun->SetParticleEnergy(60.*keV);  
+  particleGun->SetParticleEnergy(5.9*keV);  
 }
 
 PrimaryGeneratorAction::~PrimaryGeneratorAction()
@@ -60,9 +60,9 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction()
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
   G4double start_x = -45.25*mm;
-  G4double start_y = ((G4UniformRand()*2-1)*0.5*mm);
-  G4double start_z = ((G4UniformRand()*2-1)*0.5*mm);
-  particleGun->SetParticleMomentumDirection(G4ThreeVector(1., 0., 0.));
+  G4double start_y = ((G4UniformRand()*2-1)*5.0*mm);
+  G4double start_z = ((G4UniformRand()*2-1)*5.0*mm);
+  //particleGun->SetParticleMomentumDirection(G4ThreeVector(1., 0., 0.));
   G4double cosTheta = -1.0+2.0*G4UniformRand();
   G4double phi = twopi * G4UniformRand();
   G4double sinTheta = sqrt(1-cosTheta*cosTheta);
